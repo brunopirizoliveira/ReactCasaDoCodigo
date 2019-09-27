@@ -1,13 +1,39 @@
 import React, { Component } from 'react';
+import FormValidator from './FormValidator.js';
 
 export default class Formulario extends Component {
 
     constructor(props) {
         super(props);
+
+        this.validator = new FormValidator([
+            {
+                campo: 'nome',
+                metodo: 'isEmpty',
+                validoQuando: 'false',
+                mensagem: 'Coloque um nome'
+            },
+            {
+                campo: 'livro',
+                metodo: 'isEmpty',
+                validoQuando: 'false',
+                mensagem: 'Coloque um livro'
+            },
+            {
+                campo: 'preco',
+                metodo: 'isInt',
+                args: [{min: 0, max: 9999}],
+                validoQuando: 'true',
+                mensagem: 'Coloque um valor numérico'
+            },            
+            
+        ]);
+
         this.stateInicial = {
             nome: '',
             livro: '',
             preco: '',
+            validacao: this.validator.valido()
         }
 
         this.state = this.stateInicial;
@@ -20,9 +46,21 @@ export default class Formulario extends Component {
         });
     }
 
-    submitFormulario = () => {
-        this.props.escutadorDeSubmit(this.state);
-        this.setState(this.stateInicial);
+    submitFormulario = () => {        
+        const validacao = this.validator.valida(this.state);   
+        
+        if(validacao.isValid) {
+            this.props.escutadorDeSubmit(this.state);
+            this.setState(this.stateInicial);
+        } else {
+            const {nome, livro, preco} = validacao;
+            const campos = [nome, livro, preco];
+            const camposInvalidos = campos.filter(elem => {
+                return elem.isInvalid;
+            })
+            camposInvalidos.forEach(console.log)
+        }
+
     }
 
     render() {
